@@ -1,26 +1,24 @@
 import React from "react";
-import { makeObservable, observable, computed, action, flow } from "mobx";
-import { observer } from "mobx-react-lite";
 import "./App.css";
-
+import { action, computed, makeObservable, observable } from "mobx";
+import { observer } from "mobx-react-lite";
 class Counter {
   mutations: number[];
 
   constructor() {
-    this.mutations = [0];
     makeObservable(this, {
       mutations: observable,
-      increase: action,
+      change: action,
       undo: action,
       count: computed
     });
-  }
 
+    this.mutations = [];
+  }
   get count() {
-    return this.mutations.reduce((prev, next) => prev + next, 0);
+    return this.mutations.reduce((prev, cur) => prev + cur, 0);
   }
-
-  increase(n: number) {
+  change(n: number) {
     this.mutations = [...this.mutations, n];
   }
   undo() {
@@ -30,22 +28,20 @@ class Counter {
 
 const myCounter = new Counter();
 
-function App() {
+const App = observer(() => {
   return (
     <div className="App">
-      <p>{myCounter.count}</p>
-      <p className="history">
-        {myCounter.mutations
-          .map((num) => (num > 0 ? `+${num}` : `${num}`))
-          .join(",")}
-      </p>
-      <button onClick={() => myCounter.increase(1)}>+</button>
-      <button onClick={() => myCounter.increase(5)}>+5</button>
-      <button onClick={() => myCounter.increase(-1)}>-</button>
-      <button onClick={() => myCounter.increase(-5)}>-5</button>
-      <button onClick={() => myCounter.undo()}>undo</button>
+      <p>count: {myCounter.count}</p>
+      <div>
+        <button onClick={() => myCounter.change(1)}>+</button>
+        <button onClick={() => myCounter.change(5)}>+5</button>
+        <button onClick={() => myCounter.change(-1)}>-</button>
+        <button onClick={() => myCounter.change(-5)}>-5</button>
+      </div>
+      <p>History: {myCounter.mutations.join(",")}</p>
+      <button onClick={() => myCounter.undo()}>Undo</button>
     </div>
   );
-}
+});
 
-export default observer(App);
+export default App;
